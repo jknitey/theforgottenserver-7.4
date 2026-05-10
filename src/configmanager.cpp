@@ -87,6 +87,7 @@ bool ConfigManager::load()
 	boolean[HEIGHT_STACK_BLOCK] = getGlobalBoolean(L, "heightStackBlock", true);
 	boolean[ALLOW_FIGHT_BACK] = getGlobalBoolean(L, "allowFightBack", true);
 	boolean[HOUSE_ANTI_TRASH] = getGlobalBoolean(L, "houseAntiTrash", false);
+	boolean[ALLOW_SPAWN_WITH_PLAYERS_AROUND] = getGlobalBoolean(L, "allowSpawnWithPlayersAround", true);
 
 
 	string[DEFAULT_PRIORITY] = getGlobalString(L, "defaultPriority", "high");
@@ -107,6 +108,7 @@ bool ConfigManager::load()
 	integer[RATE_LOOT] = getGlobalNumber(L, "rateLoot", 2);
 	integer[RATE_MAGIC] = getGlobalNumber(L, "rateMagic", 3);
 	integer[RATE_SPAWN] = getGlobalNumber(L, "rateSpawn", 1);
+	integer[RATE_MONSTER_SPAWN_TIME] = getGlobalNumber(L, "rateMonsterSpawnTime", 1);
 	integer[HOUSE_PRICE] = getGlobalNumber(L, "housePriceEachSQM", 1000);
 	integer[KILLS_TO_RED] = getGlobalNumber(L, "killsToRedSkull", 3);
 	integer[ACTIONS_DELAY_INTERVAL] = getGlobalNumber(L, "timeBetweenActions", 200);

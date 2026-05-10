@@ -45,6 +45,7 @@ class ConfigManager
 			HEIGHT_STACK_BLOCK,
 			ALLOW_FIGHT_BACK,
 			HOUSE_ANTI_TRASH,
+			ALLOW_SPAWN_WITH_PLAYERS_AROUND,
 
 			LAST_BOOLEAN_CONFIG /* this must be the last one */
 		};
@@ -83,6 +84,7 @@ class ConfigManager
 			RATE_LOOT,
 			RATE_MAGIC,
 			RATE_SPAWN,
+			RATE_MONSTER_SPAWN_TIME,
 			HOUSE_PRICE,
 			KILLS_TO_RED,
 			MAX_MESSAGEBUFFER,

@@ -94,7 +94,8 @@ bool Spawns::loadFromXml(const std::string& _filename)
 					centerPos.y + pugi::cast<uint16_t>(childNode.attribute("y").value()),
 					centerPos.z
 				);
-				uint32_t interval = pugi::cast<uint32_t>(childNode.attribute("spawntime").value()) * 1000;
+				int32_t spawnTimeMultiplier = std::max<int32_t>(1, g_config.getNumber(ConfigManager::RATE_MONSTER_SPAWN_TIME));
+				uint32_t interval = (pugi::cast<uint32_t>(childNode.attribute("spawntime").value()) * 1000) / spawnTimeMultiplier;
 				if (interval > MINSPAWN_INTERVAL) {
 					spawn.addMonster(nameAttribute.as_string(), pos, dir, interval);
 				} else {
@@ -251,7 +252,7 @@ void Spawn::checkSpawn()
 
 		spawnBlock_t& sb = it.second;
 		if (OTSYS_TIME() >= sb.lastSpawn + sb.interval) {
-			if (findPlayer(sb.pos)) {
+			if (!g_config.getBoolean(ConfigManager::ALLOW_SPAWN_WITH_PLAYERS_AROUND) && findPlayer(sb.pos)) {
 				sb.lastSpawn = OTSYS_TIME();
 				continue;
 			}
