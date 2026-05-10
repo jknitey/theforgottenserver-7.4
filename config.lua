@@ -32,7 +32,7 @@ maxPacketsPerSecond = 25
 -- NOTE: Leave deathLosePercent as -1 if you want to use the default
 -- death penalty formula. For the old formula, set it to 10. For
 -- no skill/experience loss, set it to 0.
-deathLosePercent = -1
+deathLosePercent = 0
 
 -- Houses
 -- NOTE: set housePriceEachSQM to -1 to disable the ingame buy house functionality
@@ -46,14 +46,14 @@ timeBetweenExActions = 1000
 
 -- Map
 -- NOTE: set mapName WITHOUT .otbm at the end
-mapName = "world"
+mapName = "Tibia74"
 mapAuthor = "ond"
 
 -- MySQL
 mysqlHost = "127.0.0.1"
-mysqlUser = ""
-mysqlPass = ""
-mysqlDatabase = ""
+mysqlUser = "tfs"
+mysqlPass = "tfs"
+mysqlDatabase = "tfs74"
 mysqlPort = 3306
 mysqlSock = ""
 passwordType = "sha1"
@@ -75,11 +75,17 @@ rateExp = 5
 rateSkill = 3
 rateLoot = 2
 rateMagic = 3
-rateSpawn = 1
+rateSpawn = 5
+rateMonsterSpawnTime = 6
+-- NOTE: rateMonsterSpawnTime = 1 keeps normal behavior
+-- 2 makes 60 become 30
+-- 3 makes 60 become 20
+-- 5 makes 60 become 12
 
 -- Monsters
 deSpawnRange = 2
-deSpawnRadius = 50
+deSpawnRadius = 100
+allowSpawnWithPlayersAround = true
 
 -- Scripts
 warnUnsafeScripts = true
