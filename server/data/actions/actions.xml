@@ -23,8 +23,8 @@
 	<action itemid="3948" function="decreaseItemId" />
 	<action itemid="1479" function="increaseItemId" />
 	<action itemid="1480" function="decreaseItemId" />
-	<action itemid="1945" function="increaseItemId" />
-	<action itemid="1946" function="decreaseItemId" />
+	<action itemid="1945" script="other/lever.lua" />
+	<action itemid="1946" script="other/lever.lua" />
 	<action itemid="2037" function="increaseItemId" />
 	<action itemid="2038" function="decreaseItemId" />
 	<action itemid="2039" function="increaseItemId" />
@@ -50,6 +50,12 @@
 	<action itemid="1791" function="decreaseItemId" />
 	<action itemid="1792" function="increaseItemId" />
 	<action itemid="1793" function="decreaseItemId" />
+	<action itemid="416" function="increaseItemId" />
+	<action itemid="417" function="decreaseItemId" />
+	<action itemid="425" function="increaseItemId" />
+	<action itemid="426" function="decreaseItemId" />
+	<action itemid="446" function="increaseItemId" />
+	<action itemid="447" function="decreaseItemId" />
 	<action itemid="1634" function="increaseItemId" />
 	<action itemid="1635" function="decreaseItemId" />
 	<action itemid="1636" function="increaseItemId" />

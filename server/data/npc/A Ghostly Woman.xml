@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="A Ghostly Woman" script="default.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100"/>
+	<look type="128" head="38" body="113" legs="114" feet="95" addons="0"/>
+	<parameters>
+		<parameter key="message_greet" value="Hello |PLAYERNAME|."/>
+		<parameter key="message_farewell" value="Good bye, |PLAYERNAME|."/>
+	</parameters>
+</npc>

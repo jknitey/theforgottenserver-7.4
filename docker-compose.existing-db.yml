@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tfs74-server
+    environment:
+      TFS_DB_HOST: tfs74-db
+      TFS_DB_USER: tfs
+      TFS_DB_PASS: tfs
+      TFS_DB_NAME: tfs74
+      TFS_DB_PORT: 3306
+    ports:
+      - "7171:7171"
+      - "7172:7172"
+    volumes:
+      - ./config.lua:/opt/tfs/config.lua.template:ro
+      - ./server/data:/opt/tfs/data
+    restart: unless-stopped
+    networks:
+      - tfs74
+
+networks:
+  tfs74:
+    external: true
+    name: tfs74
+

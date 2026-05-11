@@ -37,6 +37,7 @@
 #endif
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 #include <vector>
 

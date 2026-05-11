@@ -87,6 +87,7 @@ bool ConfigManager::load()
 	boolean[HEIGHT_STACK_BLOCK] = getGlobalBoolean(L, "heightStackBlock", true);
 	boolean[ALLOW_FIGHT_BACK] = getGlobalBoolean(L, "allowFightBack", true);
 	boolean[HOUSE_ANTI_TRASH] = getGlobalBoolean(L, "houseAntiTrash", false);
+	boolean[ALLOW_SPAWN_WITH_PLAYERS_AROUND] = getGlobalBoolean(L, "allowSpawnWithPlayersAround", false);
 
 
 	string[DEFAULT_PRIORITY] = getGlobalString(L, "defaultPriority", "high");
@@ -121,6 +122,7 @@ bool ConfigManager::load()
 	integer[STAIRHOP_DELAY] = getGlobalNumber(L, "stairJumpExhaustion", 2000);
 	integer[EXP_FROM_PLAYERS_LEVEL_RANGE] = getGlobalNumber(L, "expFromPlayersLevelRange", 75);
 	integer[MAX_PACKETS_PER_SECOND] = getGlobalNumber(L, "maxPacketsPerSecond", 25);
+	integer[MONSTER_SPAWN_TIME_MULTIPLIER] = std::max<int32_t>(1, getGlobalNumber(L, "monsterSpawnTimeMultiplier", 1));
 
 	loaded = true;
 	lua_close(L);

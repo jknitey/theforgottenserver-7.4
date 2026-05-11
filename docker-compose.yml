@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: tfs74
+      MARIADB_USER: tfs
+      MARIADB_PASSWORD: tfs
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - tfs74-db-data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h127.0.0.1 -utfs -ptfs --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TFS_DB_HOST: db
+      TFS_DB_USER: tfs
+      TFS_DB_PASS: tfs
+      TFS_DB_NAME: tfs74
+      TFS_DB_PORT: 3306
+    ports:
+      - "7171:7171"
+      - "7172:7172"
+    volumes:
+      - ./config.lua:/opt/tfs/config.lua.template:ro
+      - ./server/data:/opt/tfs/data
+    restart: unless-stopped
+
+volumes:
+  tfs74-db-data:

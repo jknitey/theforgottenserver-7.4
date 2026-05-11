@@ -26,9 +26,17 @@ template <typename T, size_t CAPACITY>
 class LockfreePoolingAllocator : public std::allocator<T>
 {
 	public:
+		using value_type = T;
+
+		LockfreePoolingAllocator() = default;
+
 		template <typename U>
-		explicit LockfreePoolingAllocator(const U&) {}
-		typedef T value_type;
+		LockfreePoolingAllocator(const LockfreePoolingAllocator<U, CAPACITY>&) {}
+
+		template <typename U>
+		struct rebind {
+			using other = LockfreePoolingAllocator<U, CAPACITY>;
+		};
 
 		T* allocate(size_t) const {
 			T* p; // NOTE: p doesn't have to be initialized
@@ -45,6 +53,14 @@ class LockfreePoolingAllocator : public std::allocator<T>
 				//(it has already been called at this point)
 				operator delete(p);
 			}
+		}
+
+		bool operator==(const LockfreePoolingAllocator&) const {
+			return true;
+		}
+
+		bool operator!=(const LockfreePoolingAllocator&) const {
+			return false;
 		}
 
 	private:

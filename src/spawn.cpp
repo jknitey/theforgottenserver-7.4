@@ -33,6 +33,18 @@ extern Game g_game;
 
 #define MINSPAWN_INTERVAL 1000
 
+namespace {
+uint32_t getSpawnTimeMultiplier()
+{
+	return std::max<int32_t>(1, g_config.getNumber(ConfigManager::MONSTER_SPAWN_TIME_MULTIPLIER));
+}
+
+uint32_t getEffectiveSpawnInterval(uint32_t interval)
+{
+	return std::max<uint32_t>(MINSPAWN_INTERVAL, interval / getSpawnTimeMultiplier());
+}
+} // namespace
+
 Spawns::Spawns()
 {
 	loaded = false;
@@ -171,7 +183,7 @@ bool Spawns::isInZone(const Position& centerPos, int32_t radius, const Position&
 void Spawn::startSpawnCheck()
 {
 	if (checkSpawnEvent == 0) {
-		checkSpawnEvent = g_scheduler.addEvent(createSchedulerTask(getInterval(), std::bind(&Spawn::checkSpawn, this)));
+		checkSpawnEvent = g_scheduler.addEvent(createSchedulerTask(getEffectiveSpawnInterval(getInterval()), std::bind(&Spawn::checkSpawn, this)));
 	}
 }
 
@@ -250,8 +262,9 @@ void Spawn::checkSpawn()
 		}
 
 		spawnBlock_t& sb = it.second;
-		if (OTSYS_TIME() >= sb.lastSpawn + sb.interval) {
-			if (findPlayer(sb.pos)) {
+		uint32_t effectiveInterval = getEffectiveSpawnInterval(sb.interval);
+		if (OTSYS_TIME() >= sb.lastSpawn + effectiveInterval) {
+			if (!g_config.getBoolean(ConfigManager::ALLOW_SPAWN_WITH_PLAYERS_AROUND) && findPlayer(sb.pos)) {
 				sb.lastSpawn = OTSYS_TIME();
 				continue;
 			}
@@ -264,7 +277,7 @@ void Spawn::checkSpawn()
 	}
 
 	if (spawnedMap.size() < spawnMap.size()) {
-		checkSpawnEvent = g_scheduler.addEvent(createSchedulerTask(getInterval(), std::bind(&Spawn::checkSpawn, this)));
+		checkSpawnEvent = g_scheduler.addEvent(createSchedulerTask(getEffectiveSpawnInterval(getInterval()), std::bind(&Spawn::checkSpawn, this)));
 	}
 }
 

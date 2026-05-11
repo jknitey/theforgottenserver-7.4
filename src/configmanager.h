@@ -45,6 +45,7 @@ class ConfigManager
 			HEIGHT_STACK_BLOCK,
 			ALLOW_FIGHT_BACK,
 			HOUSE_ANTI_TRASH,
+			ALLOW_SPAWN_WITH_PLAYERS_AROUND,
 
 			LAST_BOOLEAN_CONFIG /* this must be the last one */
 		};
@@ -100,6 +101,7 @@ class ConfigManager
 			STAIRHOP_DELAY,
 			EXP_FROM_PLAYERS_LEVEL_RANGE,
 			MAX_PACKETS_PER_SECOND,
+			MONSTER_SPAWN_TIME_MULTIPLIER,
 
 			LAST_INTEGER_CONFIG /* this must be the last one */
 		};

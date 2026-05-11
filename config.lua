@@ -46,8 +46,8 @@ timeBetweenExActions = 1000
 
 -- Map
 -- NOTE: set mapName WITHOUT .otbm at the end
-mapName = "world"
-mapAuthor = "ond"
+mapName = "Tibia74"
+mapAuthor = "..."
 
 -- MySQL
 mysqlHost = "127.0.0.1"
@@ -75,11 +75,15 @@ rateExp = 5
 rateSkill = 3
 rateLoot = 2
 rateMagic = 3
-rateSpawn = 1
+rateSpawn = 2
 
 -- Monsters
 deSpawnRange = 2
 deSpawnRadius = 50
+-- If true, monsters may respawn even when players are near the spawn position.
+allowSpawnWithPlayersAround = true
+-- 1 = normal spawn time, 2 = 2x faster, 3 = 3x faster, etc.
+monsterSpawnTimeMultiplier = 5
 
 -- Scripts
 warnUnsafeScripts = true

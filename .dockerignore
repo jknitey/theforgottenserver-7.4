@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+build
+cmake-build-*
+server/theforgottenserver.exe
+server/libmysql.dll
+server/client
+server/misc
+
