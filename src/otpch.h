@@ -40,5 +40,15 @@
 #include <vector>
 
 #include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+#if BOOST_VERSION >= 109000
+namespace boost {
+namespace asio {
+using io_service = io_context;
+}
+}
+#endif
 
 #include <pugixml.hpp>

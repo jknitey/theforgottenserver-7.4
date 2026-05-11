@@ -339,3 +339,72 @@ To find the correct depot id for a town:
 2. Log out and stop the server so it saves.
 3. Query `player_depotitems` for the character.
 4. Use the observed top-level `pid` as the correct depot container id.
+
+Character logout save fix
+
+Problem
+
+Characters were not saving correctly on logout.
+
+Symptoms:
+
+- the server printed `Error while saving player: Max`
+- MariaDB reported a syntax error during `UPDATE players`
+- the broken query text stopped around `manamax`
+- the error showed a raw byte fragment like `\0001` before `` `lastlogin` ``
+
+What was happening
+
+The save query in `src/iologindata.cpp` streamed `player->sex` directly into the SQL string.
+
+In this branch, `sex` is a `uint8_t`-backed enum. Streaming that value directly into `std::ostringstream` writes it as a character byte, not a numeric SQL value.
+
+That corrupted the generated SQL during logout save, so the full player state was not persisted.
+
+There was also a secondary symptom on login:
+
+- `INSERT INTO players_online VALUES (...)` could fail with a duplicate primary key error if a stale online row was left behind
+
+How it was diagnosed
+
+The logout path was traced through:
+
+- `src/protocolgame.cpp`
+- `src/player.cpp`
+- `src/iologindata.cpp`
+
+`Player::onRemoveCreature(...)` was confirmed to call `IOLoginData::savePlayer(this)` on logout.
+
+The MariaDB error text was the key clue:
+
+- the query failed immediately after `manamax`
+- the next saved field in the query builder was `sex`
+- the raw `\0001` fragment matched a byte value being inserted into the SQL text
+
+Fix
+
+The player save query was updated to cast `sex` to an integer before writing it into SQL.
+
+Changes made:
+
+- `src/iologindata.cpp`
+  - changed `` `sex` = player->sex `` to `` `sex` = static_cast<uint32_t>(player->sex) ``
+  - changed the login tracker insert from `INSERT INTO players_online ...` to `INSERT IGNORE INTO players_online ...`
+
+Outcome
+
+After rebuilding the server with this change:
+
+- logout save no longer emits malformed SQL from the `sex` field
+- player state can persist normally on logout again
+- stale `players_online` rows no longer spam duplicate key errors on login
+
+Important note
+
+The source tree that was first patched was not the same tree as the one used to run the server.
+
+The active runtime checkout was:
+
+- `/Users/joshknight/src/theforgottenserver-7.4`
+
+The fix only takes effect after rebuilding the same checkout that produces the `build/tfs` binary being launched.

@@ -75,8 +75,8 @@ rateExp = 5
 rateSkill = 3
 rateLoot = 2
 rateMagic = 3
-rateSpawn = 5
-rateMonsterSpawnTime = 6
+rateSpawn = 1
+rateMonsterSpawnTime = 1
 -- NOTE: rateMonsterSpawnTime = 1 keeps normal behavior
 -- 2 makes 60 become 30
 -- 3 makes 60 become 20
@@ -84,8 +84,8 @@ rateMonsterSpawnTime = 6
 
 -- Monsters
 deSpawnRange = 2
-deSpawnRadius = 100
-allowSpawnWithPlayersAround = true
+deSpawnRadius = 50
+allowSpawnWithPlayersAround = false
 
 -- Scripts
 warnUnsafeScripts = true

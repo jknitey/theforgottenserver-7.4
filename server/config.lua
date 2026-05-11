@@ -75,13 +75,13 @@ rateExp = 5
 rateSkill = 3
 rateLoot = 2
 rateMagic = 3
-rateSpawn = 5
-rateMonsterSpawnTime = 6
+rateSpawn = 1
+rateMonsterSpawnTime = 1
 
 -- Monsters
 deSpawnRange = 2
-deSpawnRadius = 100
-allowSpawnWithPlayersAround = true
+deSpawnRadius = 50
+allowSpawnWithPlayersAround = false
 
 -- Scripts
 warnUnsafeScripts = true

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5...4.0)
 
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE        "-Ofast -march=native -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" AND NOT APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "-latomic")
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
@@ -35,14 +35,12 @@ option(USE_LUAJIT "Use LuaJIT" ${LUAJIT_FOUND})
 
 if(USE_LUAJIT)
     find_package(LuaJIT REQUIRED)
-    if(APPLE)
-      set(CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000")
-    endif()
 else()
     find_package(Lua)
 endif()
 
-find_package(Boost 1.53.0 COMPONENTS system REQUIRED)
+set(Boost_NO_BOOST_CMAKE ON)
+find_package(Boost 1.53.0 REQUIRED)
 
 include(src/CMakeLists.txt)
 add_executable(tfs ${tfs_SRC})

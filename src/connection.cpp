@@ -73,8 +73,9 @@ void Connection::close(bool force)
 	connectionState = CONNECTION_STATE_CLOSED;
 
 	if (protocol) {
+		auto currentProtocol = protocol;
 		g_dispatcher.addTask(
-			createTask(std::bind(&Protocol::release, protocol)));
+			createTask([currentProtocol]() { currentProtocol->release(); }));
 	}
 
 	if (messageQueue.empty() || force) {
@@ -116,7 +117,7 @@ void Connection::accept()
 {
 	std::lock_guard<std::recursive_mutex> lockClass(connectionLock);
 	try {
-		readTimer.expires_from_now(boost::posix_time::seconds(Connection::read_timeout));
+		readTimer.expires_from_now(boost::posix_time::seconds(static_cast<long>(Connection::read_timeout)));
 		readTimer.async_wait(std::bind(&Connection::handleTimeout, std::weak_ptr<Connection>(shared_from_this()), std::placeholders::_1));
 
 		// Read size of the first packet
@@ -156,7 +157,7 @@ void Connection::parseHeader(const boost::system::error_code& error)
 	}
 
 	try {
-		readTimer.expires_from_now(boost::posix_time::seconds(Connection::read_timeout));
+		readTimer.expires_from_now(boost::posix_time::seconds(static_cast<long>(Connection::read_timeout)));
 		readTimer.async_wait(std::bind(&Connection::handleTimeout, std::weak_ptr<Connection>(shared_from_this()),
 		                                    std::placeholders::_1));
 
@@ -204,7 +205,7 @@ void Connection::parsePacket(const boost::system::error_code& error)
 	}
 
 	try {
-		readTimer.expires_from_now(boost::posix_time::seconds(Connection::read_timeout));
+		readTimer.expires_from_now(boost::posix_time::seconds(static_cast<long>(Connection::read_timeout)));
 		readTimer.async_wait(std::bind(&Connection::handleTimeout, std::weak_ptr<Connection>(shared_from_this()),
 		                                    std::placeholders::_1));
 
@@ -236,7 +237,7 @@ void Connection::internalSend(const OutputMessage_ptr& msg)
 {
 	protocol->onSendMessage(msg);
 	try {
-		writeTimer.expires_from_now(boost::posix_time::seconds(Connection::write_timeout));
+		writeTimer.expires_from_now(boost::posix_time::seconds(static_cast<long>(Connection::write_timeout)));
 		writeTimer.async_wait(std::bind(&Connection::handleTimeout, std::weak_ptr<Connection>(shared_from_this()),
 		                                     std::placeholders::_1));
 
@@ -260,7 +261,7 @@ uint32_t Connection::getIP()
 		return 0;
 	}
 
-	return htonl(endpoint.address().to_v4().to_ulong());
+	return htonl(endpoint.address().to_v4().to_uint());
 }
 
 void Connection::onWriteOperation(const boost::system::error_code& error)

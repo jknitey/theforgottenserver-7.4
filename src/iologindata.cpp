@@ -144,7 +144,7 @@ void IOLoginData::updateOnlineStatus(uint32_t guid, bool login)
 
 	std::ostringstream query;
 	if (login) {
-		query << "INSERT INTO `players_online` VALUES (" << guid << ')';
+		query << "INSERT IGNORE INTO `players_online` VALUES (" << guid << ')';
 	} else {
 		query << "DELETE FROM `players_online` WHERE `player_id` = " << guid;
 	}
@@ -641,7 +641,7 @@ bool IOLoginData::savePlayer(Player* player)
 	query << "`posz` = " << loginPosition.getZ() << ',';
 
 	query << "`cap` = " << (player->capacity / 100) << ',';
-	query << "`sex` = " << player->sex << ',';
+	query << "`sex` = " << static_cast<uint32_t>(player->sex) << ',';
 
 	if (player->lastLoginSaved != 0) {
 		query << "`lastlogin` = " << player->lastLoginSaved << ',';

@@ -62,7 +62,7 @@ void ServiceManager::stop()
 
 	for (auto& servicePortIt : acceptors) {
 		try {
-			io_service.post(std::bind(&ServicePort::onStopServer, servicePortIt.second));
+			boost::asio::post(io_service, std::bind(&ServicePort::onStopServer, servicePortIt.second));
 		} catch (boost::system::system_error& e) {
 			std::cout << "[ServiceManager::stop] Network Error: " << e.what() << std::endl;
 		}
@@ -182,7 +182,7 @@ void ServicePort::open(uint16_t port)
 	try {
 		if (g_config.getBoolean(ConfigManager::BIND_ONLY_GLOBAL_ADDRESS)) {
 			acceptor.reset(new boost::asio::ip::tcp::acceptor(io_service, boost::asio::ip::tcp::endpoint(
-			            boost::asio::ip::address(boost::asio::ip::address_v4::from_string(g_config.getString(ConfigManager::IP))), serverPort)));
+			            boost::asio::ip::make_address(g_config.getString(ConfigManager::IP)), serverPort)));
 		} else {
 			acceptor.reset(new boost::asio::ip::tcp::acceptor(io_service, boost::asio::ip::tcp::endpoint(
 			            boost::asio::ip::address(boost::asio::ip::address_v4(INADDR_ANY)), serverPort)));
