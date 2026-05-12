@@ -526,6 +526,10 @@ if(NpcHandler == nil) then
 			return false
 		end
 
+		if self.focuses == cid then
+			return true
+		end
+
 		if getNpcId == nil and getNpcCid == nil then
 			return true
 		end
