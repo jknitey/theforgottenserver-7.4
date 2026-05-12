@@ -367,6 +367,25 @@ function setPlayerStorageValue(cid, key, value) local p = Player(cid) return p ~
 function doPlayerSetBalance(cid, balance) local p = Player(cid) return p ~= nil and p:setBankBalance(balance) or false end
 function doPlayerAddMoney(cid, money) local p = Player(cid) return p ~= nil and p:addMoney(money) or false end
 function doPlayerRemoveMoney(cid, money) local p = Player(cid) return p ~= nil and p:removeMoney(money) or false end
+function doPlayerAddItem(cid, itemid, count, canDropOnMap, subType, slot)
+	local player = Player(cid)
+	if player == nil then
+		return false
+	end
+
+	local itemCount = count or 1
+	local dropOnMap = canDropOnMap
+	if dropOnMap == nil then
+		dropOnMap = true
+	end
+
+	local createdItem = player:addItem(itemid, itemCount, dropOnMap, subType, slot)
+	return createdItem ~= nil and createdItem or false
+end
+function doPlayerTakeItem(cid, itemid, count, ...)
+	local p = Player(cid)
+	return p ~= nil and p:removeItem(itemid, count, ...) or false
+end
 function doPlayerAddSoul(cid, soul) local p = Player(cid) return p ~= nil and p:addSoul(soul) or false end
 function doPlayerSetVocation(cid, vocation) local p = Player(cid) return p ~= nil and p:setVocation(Vocation(vocation)) or false end
 function doPlayerSetTown(cid, town) local p = Player(cid) return p ~= nil and p:setTown(Town(town)) or false end

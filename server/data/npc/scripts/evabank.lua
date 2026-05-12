@@ -10,6 +10,16 @@ local platIntoGold = 0
 local platIntoCrys = 0
 local crysIntoPlat = 0
 local transferName = ""
+local talkState = 0
+
+local function getCount(message)
+	local amount = tonumber(message:match("%d+"))
+	return amount or 0
+end
+
+local function wordEnding(amount)
+	return amount == 1 and "" or "s"
+end
 
 function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid)			end
 function onCreatureDisappear(cid)			npcHandler:onCreatureDisappear(cid)			end
@@ -17,13 +27,8 @@ function onCreatureSay(cid, type, msg)			npcHandler:onCreatureSay(cid, type, msg
 function onThink()					npcHandler:onThink()					end
 
 function creatureSayCallback(cid, type, msg)
-	if(npcHandler.focus ~= cid) then
+	if(not npcHandler:isFocused(cid)) then
 		return false
-	end
-
-	local function wordEnding(b65alance)
-		if isInArray({ 0, 1 }, balance) == TRUE then ending = "" else ending = "s" end
-		return ending
 	end
 
 	if msgcontains(msg, 'shsdh') then
