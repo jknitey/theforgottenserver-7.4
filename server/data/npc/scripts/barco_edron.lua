@@ -1,62 +1,98 @@
 dofile("data/npc/lib/_npcsystem.lua")
+
 local keywordHandler = KeywordHandler:new()
-        local npcHandler = NpcHandler:new(keywordHandler)
-        NpcSystem.parseParameters(npcHandler)
-        
-        
-        
-        -- OTServ event handling functions start
-function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid) end
-function onCreatureDisappear(cid) 			npcHandler:onCreatureDisappear(cid) end
-function onCreatureSay(cid, type, msg) 	npcHandler:onCreatureSay(cid, type, msg) end
-function onThink() 						npcHandler:onThink() end
--- OTServ event handling functions end
+local npcHandler = NpcHandler:new(keywordHandler)
+NpcSystem.parseParameters(npcHandler)
 
-local function getTownTravelPosition(townName, fallback)
-	return {x = fallback.x, y = fallback.y, z = fallback.z, stackpos = 0}
+function onCreatureAppear(cid) npcHandler:onCreatureAppear(cid) end
+function onCreatureDisappear(cid) npcHandler:onCreatureDisappear(cid) end
+function onCreatureSay(cid, type, msg) npcHandler:onCreatureSay(cid, type, msg) end
+function onThink() npcHandler:onThink() end
+
+local pendingTravel = {}
+
+local function getPlayerKey(cid)
+	if type(cid) == "userdata" and cid.getId ~= nil then
+		return cid:getId()
+	end
+
+	return cid
 end
-        
-        
-        -- Don't forget npcHandler = npcHandler in the parameters. It is required for all StdModule functions!
-	local travelNode = keywordHandler:addKeyword({'thais'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you seek a passage to Thais for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Thais', {x=32310, y=32210, z=7}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
 
-        local travelNode = keywordHandler:addKeyword({'carlin'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you want to sail to Carlin for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Carlin', {x=32388, y=31821, z=6}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-        
-	local travelNode = keywordHandler:addKeyword({'ab\'dendriel'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you want to sail to Ab\'dendriel for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition("Ab'Dendriel", {x=32734, y=31668, z=7}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-        			
-	local travelNode = keywordHandler:addKeyword({'venore'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you want to sail to Venore for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Venore', {x=32954, y=32022, z=7}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-        
-	local travelNode = keywordHandler:addKeyword({'port hope'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you want to sail to Port Hope for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Port Hope', {x=32527, y=32784, z=6}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-			        
-	local travelNode = keywordHandler:addKeyword({'darashia'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you want to sail to Darashia for free?'})
-        	travelNode:addChildKeyword({'no'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Darashia', {x=33289, y=32480, z=7}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-        
-	local travelNode = keywordHandler:addKeyword({'gengia'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you seek a passage to Gengia free?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = {x=31634, y=32029, z=4} })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-		
-	local travelNode = keywordHandler:addKeyword({'ankrahmun'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you seek a passage to Ankrahmun for 0 gold coins?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = getTownTravelPosition('Ankrahmun', {x=33092, y=32883, z=7}) })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
-	
-	local travelNode = keywordHandler:addKeyword({'cormaya'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Do you seek a passage to Cormaya?'})
-        	travelNode:addChildKeyword({'yes'}, StdModule.travel, {npcHandler = npcHandler, premium = true, level = 0, cost = 0, destination = {x=33288, y=31956, z=6} })
-        	travelNode:addChildKeyword({'no'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, reset = true, text = 'We would like to serve you some time.'})
+local routes = {
+	["thais"] = {name = "Thais", cost = 0, level = 8, premium = true, destination = {x = 32310, y = 32210, z = 7}},
+	["carlin"] = {name = "Carlin", cost = 0, level = 8, premium = true, destination = {x = 32388, y = 31821, z = 6}},
+	["ab'dendriel"] = {name = "Ab'Dendriel", cost = 0, level = 8, premium = true, destination = {x = 32734, y = 31669, z = 7}},
+	["venore"] = {name = "Venore", cost = 0, level = 8, premium = true, destination = {x = 32954, y = 32022, z = 7}},
+	["port hope"] = {name = "Port Hope", cost = 0, level = 8, premium = true, destination = {x = 32527, y = 32784, z = 6}},
+	["ankrahmun"] = {name = "Ankrahmun", cost = 0, level = 8, premium = true, destination = {x = 33092, y = 32883, z = 7}},
+	["cormaya"] = {name = "Cormaya", cost = 0, level = 8, premium = true, destination = {x = 33288, y = 31956, z = 6}},
+}
 
-        keywordHandler:addKeyword({'sail'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Where do you want to go? To Thais, Carlin, Ab\'Dendriel, Venore, Port Hope, Ankrahmun or the isle Cormaya?'})
-        keywordHandler:addKeyword({'job'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I\'m the captain of this sailing ship.'})
-		keywordHandler:addKeyword({'captain'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I\'m the captain of this sailing ship.'})
-       
+local function clearPending(cid)
+	pendingTravel[getPlayerKey(cid)] = nil
+end
 
-        npcHandler:addModule(FocusModule:new())
+local function askTravel(cid, route)
+	pendingTravel[getPlayerKey(cid)] = route
+	npcHandler:say(string.format("Do you want to travel to %s for %d gold coins?", route.name, route.cost), cid)
+end
+
+local function handleTravel(cid, route)
+	if route.premium and not isPremium(cid) then
+		npcHandler:say("I'm sorry, but you need a premium account in order to travel onboard our ships.", cid)
+	elseif getPlayerLevel(cid) < route.level then
+		npcHandler:say("You must reach level " .. route.level .. " before I can let you go there.", cid)
+	elseif isPlayerPzLocked(cid) then
+		npcHandler:say("First get rid of those blood stains! You are not going to ruin my vehicle!", cid)
+	elseif not doPlayerRemoveMoney(cid, route.cost) then
+		npcHandler:say("You don't have enough money.", cid)
+	else
+		npcHandler:say("Set the sails!", cid)
+		npcHandler:releaseFocus(cid)
+		doTeleportThing(cid, route.destination, false)
+		doSendMagicEffect(route.destination, CONST_ME_TELEPORT)
+	end
+
+	clearPending(cid)
+	npcHandler:resetNpc(cid)
+end
+
+function creatureSayCallback(cid, type, msg)
+	msg = string.lower(msg)
+
+	if not npcHandler:isFocused(cid) then
+		return false
+	end
+
+	if msgcontains(msg, "destination") or msgcontains(msg, "destinations") or msgcontains(msg, "sail") or msgcontains(msg, "passage") or msgcontains(msg, "trip") or msgcontains(msg, "route") or msgcontains(msg, "go") then
+		npcHandler:say("Where do you want to go? To Thais, Carlin, Ab'Dendriel, Venore, Port Hope, Ankrahmun or the isle Cormaya?", cid)
+		return true
+	end
+
+	for keyword, route in pairs(routes) do
+		if msgcontains(msg, keyword) then
+			askTravel(cid, route)
+			return true
+		end
+	end
+
+	if msgcontains(msg, "yes") then
+		local route = pendingTravel[getPlayerKey(cid)]
+		if route then
+			handleTravel(cid, route)
+			return true
+		end
+	elseif msgcontains(msg, "no") then
+		if pendingTravel[getPlayerKey(cid)] then
+			npcHandler:say("Ok, come back when you want then!", cid)
+			clearPending(cid)
+			return true
+		end
+	end
+
+	return true
+end
+
+npcHandler:setCallback(CALLBACK_MESSAGE_DEFAULT, creatureSayCallback)
+npcHandler:addModule(FocusModule:new())

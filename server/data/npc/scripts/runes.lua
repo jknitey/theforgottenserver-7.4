@@ -3,6 +3,22 @@ local keywordHandler = KeywordHandler:new()
 local npcHandler = NpcHandler:new(keywordHandler)
 NpcSystem.parseParameters(npcHandler)
 local talkState = {}
+local pendingPurchase = {}
+
+local FLUID_MANA = 7
+local FLUID_LIFE = 10
+
+local function giveFluidBackpack(cid, fluidType)
+	local backpack = doPlayerAddItem(cid, 2000, 1)
+	if not backpack then
+		return false
+	end
+
+	for _ = 1, 20 do
+		doAddContainerItem(backpack, 2006, fluidType)
+	end
+	return true
+end
 
 function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid) 			end
 function onCreatureDisappear(cid) 			npcHandler:onCreatureDisappear(cid) 		end
@@ -17,12 +33,7 @@ npcHandler:addModule(shopModule)
 shopModule:addBuyableItem({'spellbook'}, 2175, 150,'spellbook')
 shopModule:addBuyableItem({'magic lightwand'}, 2163, 400, 'magic lightwand')
 
-shopModule:addBuyableItem({'mana fluid', 'manafluid'}, 2006, 40, 7, 'mana fluid')
-shopModule:addBuyableItem({'life fluid', 'lifefluid'}, 2006, 50, 10, 'life fluid')
 shopModule:addBuyableItem({'amulet of loss', 'aol'}, 2173, 50000, 'amulet of loss')
-
-shopModule:addBuyableItemContainer({'bp mf'}, 2000, 2006, 800, 7, 'backpack of mana fluids')
-shopModule:addBuyableItemContainer({'bp lf'}, 2000, 2006, 1000, 10, 'backpack of life fluids')
 
 shopModule:addBuyableItem({'animate dead'}, 2316, 375, 1, 'animate dead rune')
 shopModule:addBuyableItem({'blank rune'}, 2260, 10, 1, 'blank rune')
@@ -101,6 +112,84 @@ function creatureSayCallback(cid, type, msg)
 	end
 
 	local talkUser = NPCHANDLER_CONVBEHAVIOR == CONVERSATION_DEFAULT and 0 or cid
+	local message = msg:lower()
+
+	if message == 'trade' then
+		selfSay('The trade window is unavailable right now. Say buy mana fluid, buy life fluid, buy bp mf, or buy bp lf.', cid)
+		return true
+	elseif message == 'buy mana fluid' or message == 'buy manafluid' then
+		selfSay('Do you want to buy a mana fluid for 40 gold coins?', cid)
+		talkState[talkUser] = 2
+		pendingPurchase[talkUser] = 'mana_fluid'
+		return true
+	elseif message == 'buy life fluid' or message == 'buy lifefluid' then
+		selfSay('Do you want to buy a life fluid for 50 gold coins?', cid)
+		talkState[talkUser] = 2
+		pendingPurchase[talkUser] = 'life_fluid'
+		return true
+	elseif message == 'buy bp mf' or message == 'buy backpack of mana fluid' or message == 'buy backpack of mana fluids' then
+		selfSay('Do you want to buy a backpack of mana fluids for 800 gold coins?', cid)
+		talkState[talkUser] = 2
+		pendingPurchase[talkUser] = 'bp_mf'
+		return true
+	elseif message == 'buy bp lf' or message == 'buy backpack of life fluid' or message == 'buy backpack of life fluids' then
+		selfSay('Do you want to buy a backpack of life fluids for 1000 gold coins?', cid)
+		talkState[talkUser] = 2
+		pendingPurchase[talkUser] = 'bp_lf'
+		return true
+	elseif message == 'yes' and talkState[talkUser] == 2 then
+		local purchase = pendingPurchase[talkUser]
+		talkState[talkUser] = 0
+		pendingPurchase[talkUser] = nil
+
+		if purchase == 'mana_fluid' then
+			if not doPlayerRemoveMoney(cid, 40) then
+				selfSay('You do not have enough money.', cid)
+				return true
+			end
+			doPlayerAddItem(cid, 2006, 1, true, FLUID_MANA)
+			selfSay('Here you are.', cid)
+			return true
+		elseif purchase == 'life_fluid' then
+			if not doPlayerRemoveMoney(cid, 50) then
+				selfSay('You do not have enough money.', cid)
+				return true
+			end
+			doPlayerAddItem(cid, 2006, 1, true, FLUID_LIFE)
+			selfSay('Here you are.', cid)
+			return true
+		elseif purchase == 'bp_mf' then
+			if not doPlayerRemoveMoney(cid, 800) then
+				selfSay('You do not have enough money.', cid)
+				return true
+			end
+			if not giveFluidBackpack(cid, FLUID_MANA) then
+				doPlayerAddMoney(cid, 800)
+				selfSay('You do not have enough capacity.', cid)
+				return true
+			end
+			selfSay('Here you are.', cid)
+			return true
+		elseif purchase == 'bp_lf' then
+			if not doPlayerRemoveMoney(cid, 1000) then
+				selfSay('You do not have enough money.', cid)
+				return true
+			end
+			if not giveFluidBackpack(cid, FLUID_LIFE) then
+				doPlayerAddMoney(cid, 1000)
+				selfSay('You do not have enough capacity.', cid)
+				return true
+			end
+			selfSay('Here you are.', cid)
+			return true
+		end
+	elseif message == 'no' and talkState[talkUser] == 2 then
+		selfSay('Ok then.', cid)
+		talkState[talkUser] = 0
+		pendingPurchase[talkUser] = nil
+		return true
+	end
+
 	if(msgcontains(msg, 'first rod') or msgcontains(msg, 'first wand')) then
 		if(isSorcerer(cid) or isDruid(cid)) then
 			if(getPlayerStorageValue(cid, 50111) <= 0) then

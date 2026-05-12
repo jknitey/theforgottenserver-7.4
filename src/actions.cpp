@@ -32,6 +32,52 @@ extern Spells* g_spells;
 extern Actions* g_actions;
 extern ConfigManager g_config;
 
+namespace {
+uint16_t resolveDepotId(const Item* item)
+{
+	const Container* container = item ? item->getContainer() : nullptr;
+	const DepotLocker* depotLocker = container ? container->getDepotLocker() : nullptr;
+	if (!depotLocker) {
+		return 0;
+	}
+
+	uint16_t depotId = depotLocker->getDepotId();
+	if (depotId != 0) {
+		return depotId;
+	}
+
+	const Tile* originTile = item->getTile();
+	if (!originTile) {
+		return 0;
+	}
+
+	const Position& position = originTile->getPosition();
+	for (int32_t x = -1; x <= 1; ++x) {
+		for (int32_t y = -1; y <= 1; ++y) {
+			Tile* tile = g_game.map.getTile(position.x + x, position.y + y, position.z);
+			if (!tile) {
+				continue;
+			}
+
+			const TileItemVector* items = tile->getItemList();
+			if (!items) {
+				continue;
+			}
+
+			for (Item* tileItem : *items) {
+				const Container* tileContainer = tileItem->getContainer();
+				const DepotLocker* nearbyDepot = tileContainer ? tileContainer->getDepotLocker() : nullptr;
+				if (nearbyDepot && nearbyDepot->getDepotId() != 0) {
+					return nearbyDepot->getDepotId();
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+}
+
 Actions::Actions() :
 	scriptInterface("Action Interface")
 {
@@ -306,10 +352,15 @@ ReturnValue Actions::internalUseItem(Player* player, const Position& pos, uint8_
 
 		//depot container
 		if (DepotLocker* depot = container->getDepotLocker()) {
-			DepotLocker* myDepotLocker = player->getDepotLocker(depot->getDepotId());
+			uint16_t depotId = resolveDepotId(item);
+			if (depotId == 0) {
+				depotId = depot->getDepotId();
+			}
+
+			DepotLocker* myDepotLocker = player->getDepotLocker(depotId);
 			myDepotLocker->setParent(depot->getParent());
 			openContainer = myDepotLocker;
-			player->setLastDepotId(depot->getDepotId());
+			player->setLastDepotId(depotId);
 		} else {
 			openContainer = container;
 		}

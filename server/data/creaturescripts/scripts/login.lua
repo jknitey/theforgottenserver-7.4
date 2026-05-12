@@ -1,5 +1,6 @@
 -- Ordered as in creaturescripts.xml
 local events = {
+	'LevelRestore',
 	'PlayerDeath',
 	'DropLoot'
 }
