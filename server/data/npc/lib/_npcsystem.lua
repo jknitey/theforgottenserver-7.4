@@ -239,7 +239,7 @@ if(NpcSystem == nil) then
 	PATTERN_COUNT = '%d+'
 
 	-- Talkdelay behavior. For more information, look at the top of npchandler.lua.
-	NPCHANDLER_TALKDELAY = TALKDELAY_ONTHINK
+	NPCHANDLER_TALKDELAY = TALKDELAY_NONE
 
 	-- Conversation behavior. For more information, look at the top of npchandler.lua.
 	NPCHANDLER_CONVBEHAVIOR = CONVERSATION_DEFAULT

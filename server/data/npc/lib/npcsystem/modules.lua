@@ -254,6 +254,58 @@ if(Modules == nil) then
 
 	-- Greeting callback function.
 	function FocusModule.onGreet(cid, message, keywords, parameters)
+		local function getDistance(a, b)
+			return math.max(math.abs(a.x - b.x), math.abs(a.y - b.y))
+		end
+
+		local npcId = getNpcId ~= nil and getNpcId() or nil
+		if(npcId ~= nil and npcId ~= 0) then
+			local npcName = string.lower(getCreatureName(npcId))
+			local messageLower = string.lower(message)
+			local playerPosition = getCreaturePosition(cid)
+			if(playerPosition) then
+				local spectators = getSpectators(playerPosition, 7, 7) or {}
+				for _, uid in ipairs(spectators) do
+					if(uid ~= npcId and isNpc(uid)) then
+						local otherNpcName = string.lower(getCreatureName(uid))
+						if(string.find(messageLower, otherNpcName, 1, true)) then
+							return false
+						end
+					end
+				end
+			end
+
+			if(not string.find(messageLower, npcName, 1, true)) then
+				local npcPosition = getCreaturePosition(npcId)
+				if(npcPosition and playerPosition) then
+					local spectators = getSpectators(playerPosition, 7, 7) or {}
+					local closestNpcId = npcId
+					local closestDistance = getDistance(npcPosition, playerPosition)
+					local hasTie = false
+
+					for _, uid in ipairs(spectators) do
+						if(uid ~= npcId and isNpc(uid)) then
+							local spectatorPosition = getCreaturePosition(uid)
+							if(spectatorPosition and spectatorPosition.z == playerPosition.z) then
+								local spectatorDistance = getDistance(spectatorPosition, playerPosition)
+								if(spectatorDistance < closestDistance) then
+									closestDistance = spectatorDistance
+									closestNpcId = uid
+									hasTie = false
+								elseif(spectatorDistance == closestDistance) then
+									hasTie = true
+								end
+							end
+						end
+					end
+
+					if(closestNpcId ~= npcId or hasTie) then
+						return false
+					end
+				end
+			end
+		end
+
 		parameters.module.npcHandler:onGreet(cid)
 		return true
 	end

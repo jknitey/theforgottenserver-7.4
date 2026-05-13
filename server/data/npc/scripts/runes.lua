@@ -22,7 +22,6 @@ end
 
 function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid) 			end
 function onCreatureDisappear(cid) 			npcHandler:onCreatureDisappear(cid) 		end
-function onCreatureSay(cid, type, msg) 		npcHandler:onCreatureSay(cid, type, msg) 	end
 function onThink() 							npcHandler:onThink() 						end
 function onPlayerEndTrade(cid)				npcHandler:onPlayerEndTrade(cid)			end
 function onPlayerCloseChannel(cid)			npcHandler:onPlayerCloseChannel(cid)		end
@@ -32,6 +31,10 @@ npcHandler:addModule(shopModule)
 
 shopModule:addBuyableItem({'spellbook'}, 2175, 150,'spellbook')
 shopModule:addBuyableItem({'magic lightwand'}, 2163, 400, 'magic lightwand')
+shopModule:addBuyableItem({'mana fluid', 'manafluid'}, 2006, 5, 7, 'mana fluid')
+shopModule:addBuyableItem({'life fluid', 'lifefluid'}, 2006, 50, 10, 'life fluid')
+shopModule:addBuyableItemContainer({'bp mf'}, 2000, 2006, 100, 7, 'backpack of mana fluids')
+shopModule:addBuyableItemContainer({'bp lf'}, 2000, 2006, 1000, 10, 'backpack of life fluids')
 
 shopModule:addBuyableItem({'amulet of loss', 'aol'}, 2173, 50000, 'amulet of loss')
 
@@ -106,6 +109,147 @@ shopModule:addSellableItem({'quagmire rod', 'quagmire'}, 2181, 2000, 'quagmire r
 shopModule:addSellableItem({'tempest rod', 'tempest'}, 2183, 3000, 'tempest rod')
 
 local items = {[1] = 2190, [2] = 2182, [5] = 2190, [6] = 2182}
+
+local function getFluidPurchaseRequest(message)
+	local amount, itemName = message:match('^buy%s+(%d+)%s+(.+)$')
+	if amount and itemName then
+		amount = tonumber(amount) or 1
+		if itemName == 'mana fluid' or itemName == 'manafluid' then
+			return 'mana_fluid', amount
+		elseif itemName == 'life fluid' or itemName == 'lifefluid' then
+			return 'life_fluid', amount
+		end
+	end
+
+	if message == 'buy mana fluid' or message == 'buy manafluid' then
+		return 'mana_fluid', 1
+	elseif message == 'buy life fluid' or message == 'buy lifefluid' then
+		return 'life_fluid', 1
+	elseif message == 'buy bp mf' or message == 'buy backpack of mana fluid' or message == 'buy backpack of mana fluids' then
+		return 'bp_mf', 1
+	elseif message == 'buy bp lf' or message == 'buy backpack of life fluid' or message == 'buy backpack of life fluids' then
+		return 'bp_lf', 1
+	end
+
+	return nil, nil
+end
+
+local function getVialSellRequest(message)
+	local amount, itemName = message:match('^sell%s+(%d+)%s+(.+)$')
+	if amount and itemName then
+		amount = tonumber(amount) or 1
+		if itemName == 'vial' or itemName == 'vials' or itemName == 'flask' or itemName == 'flasks' then
+			return amount
+		end
+	end
+
+	if message == 'sell vial' or message == 'sell vials' or message == 'sell flask' or message == 'sell flasks' then
+		return 1
+	end
+
+	return nil
+end
+
+local function isDirectShopMessage(message)
+	if message == 'trade' then
+		return true
+	end
+
+	local purchaseType = getFluidPurchaseRequest(message)
+	if purchaseType ~= nil then
+		return true
+	end
+
+	return getVialSellRequest(message) ~= nil
+end
+
+local function completeFluidPurchase(cid, purchaseKind, amount)
+	if purchaseKind == 'mana_fluid' then
+		local totalCost = amount * 5
+		if doPlayerBuyItem(cid, 2006, amount, totalCost, FLUID_MANA) then
+			selfSay('Here you are.', cid)
+		else
+			selfSay('You do not have enough money or capacity.', cid)
+		end
+		return true
+	elseif purchaseKind == 'life_fluid' then
+		local totalCost = amount * 50
+		if doPlayerBuyItem(cid, 2006, amount, totalCost, FLUID_LIFE) then
+			selfSay('Here you are.', cid)
+		else
+			selfSay('You do not have enough money or capacity.', cid)
+		end
+		return true
+	elseif purchaseKind == 'bp_mf' then
+		if not doPlayerRemoveMoney(cid, 100) then
+			selfSay('You do not have enough money.', cid)
+			return true
+		end
+		if not giveFluidBackpack(cid, FLUID_MANA) then
+			doPlayerAddMoney(cid, 100)
+			selfSay('You do not have enough capacity.', cid)
+			return true
+		end
+		selfSay('Here you are.', cid)
+		return true
+	elseif purchaseKind == 'bp_lf' then
+		if not doPlayerRemoveMoney(cid, 1000) then
+			selfSay('You do not have enough money.', cid)
+			return true
+		end
+		if not giveFluidBackpack(cid, FLUID_LIFE) then
+			doPlayerAddMoney(cid, 1000)
+			selfSay('You do not have enough capacity.', cid)
+			return true
+		end
+		selfSay('Here you are.', cid)
+		return true
+	end
+
+	return false
+end
+
+local function completeVialSale(cid, amount)
+	local totalValue = amount * 25
+	if doPlayerSellItem(cid, 2006, amount, totalValue) then
+		selfSay('Here you are.', cid)
+	else
+		selfSay('You do not have enough vials.', cid)
+	end
+	return true
+end
+
+local function shouldHandleDirectly(cid, msg)
+	local message = msg:lower()
+	if isDirectShopMessage(message) then
+		return true
+	end
+
+	local talkUser = NPCHANDLER_CONVBEHAVIOR == CONVERSATION_DEFAULT and 0 or cid
+	if (message == 'yes' or message == 'no') and (talkState[talkUser] == 1 or talkState[talkUser] == 2 or pendingPurchase[talkUser] ~= nil) then
+		return true
+	end
+
+	if not npcHandler:isFocused(cid) then
+		return false
+	end
+
+	return msgcontains(msg, 'first rod') or msgcontains(msg, 'first wand')
+end
+
+function onCreatureSay(cid, type, msg)
+	if shouldHandleDirectly(cid, msg) then
+		local talkUser = NPCHANDLER_CONVBEHAVIOR == CONVERSATION_DEFAULT and 0 or cid
+		if not npcHandler:isFocused(cid) and npcHandler:isInRange(cid) and (isDirectShopMessage(msg:lower()) or pendingPurchase[talkUser] ~= nil or talkState[talkUser] ~= nil) then
+			npcHandler:addFocus(cid)
+		end
+		creatureSayCallback(cid, type, msg)
+		return
+	end
+
+	npcHandler:onCreatureSay(cid, type, msg)
+end
+
 function creatureSayCallback(cid, type, msg)
 	if(not npcHandler:isFocused(cid)) then
 		return false
@@ -113,76 +257,40 @@ function creatureSayCallback(cid, type, msg)
 
 	local talkUser = NPCHANDLER_CONVBEHAVIOR == CONVERSATION_DEFAULT and 0 or cid
 	local message = msg:lower()
+	local purchaseType, purchaseAmount = getFluidPurchaseRequest(message)
+	local sellVialAmount = getVialSellRequest(message)
 
 	if message == 'trade' then
-		selfSay('The trade window is unavailable right now. Say buy mana fluid, buy life fluid, buy bp mf, or buy bp lf.', cid)
+		selfSay('The trade window is unavailable right now. Say buy mana fluid, buy life fluid, buy bp mf, buy bp lf, or sell vial.', cid)
 		return true
-	elseif message == 'buy mana fluid' or message == 'buy manafluid' then
-		selfSay('Do you want to buy a mana fluid for 40 gold coins?', cid)
+	elseif purchaseType == 'mana_fluid' then
+		return completeFluidPurchase(cid, purchaseType, purchaseAmount)
+	elseif purchaseType == 'life_fluid' then
+		return completeFluidPurchase(cid, purchaseType, purchaseAmount)
+	elseif sellVialAmount then
+		return completeVialSale(cid, sellVialAmount)
+	elseif purchaseType == 'bp_mf' then
+		selfSay('Do you want to buy a backpack of mana fluids for 100 gold coins?', cid)
 		talkState[talkUser] = 2
-		pendingPurchase[talkUser] = 'mana_fluid'
+		pendingPurchase[talkUser] = {type = purchaseType, amount = 1}
 		return true
-	elseif message == 'buy life fluid' or message == 'buy lifefluid' then
-		selfSay('Do you want to buy a life fluid for 50 gold coins?', cid)
-		talkState[talkUser] = 2
-		pendingPurchase[talkUser] = 'life_fluid'
-		return true
-	elseif message == 'buy bp mf' or message == 'buy backpack of mana fluid' or message == 'buy backpack of mana fluids' then
-		selfSay('Do you want to buy a backpack of mana fluids for 800 gold coins?', cid)
-		talkState[talkUser] = 2
-		pendingPurchase[talkUser] = 'bp_mf'
-		return true
-	elseif message == 'buy bp lf' or message == 'buy backpack of life fluid' or message == 'buy backpack of life fluids' then
+	elseif purchaseType == 'bp_lf' then
 		selfSay('Do you want to buy a backpack of life fluids for 1000 gold coins?', cid)
 		talkState[talkUser] = 2
-		pendingPurchase[talkUser] = 'bp_lf'
+		pendingPurchase[talkUser] = {type = purchaseType, amount = 1}
 		return true
 	elseif message == 'yes' and talkState[talkUser] == 2 then
 		local purchase = pendingPurchase[talkUser]
 		talkState[talkUser] = 0
 		pendingPurchase[talkUser] = nil
-
-		if purchase == 'mana_fluid' then
-			if not doPlayerRemoveMoney(cid, 40) then
-				selfSay('You do not have enough money.', cid)
-				return true
-			end
-			doPlayerAddItem(cid, 2006, 1, true, FLUID_MANA)
-			selfSay('Here you are.', cid)
-			return true
-		elseif purchase == 'life_fluid' then
-			if not doPlayerRemoveMoney(cid, 50) then
-				selfSay('You do not have enough money.', cid)
-				return true
-			end
-			doPlayerAddItem(cid, 2006, 1, true, FLUID_LIFE)
-			selfSay('Here you are.', cid)
-			return true
-		elseif purchase == 'bp_mf' then
-			if not doPlayerRemoveMoney(cid, 800) then
-				selfSay('You do not have enough money.', cid)
-				return true
-			end
-			if not giveFluidBackpack(cid, FLUID_MANA) then
-				doPlayerAddMoney(cid, 800)
-				selfSay('You do not have enough capacity.', cid)
-				return true
-			end
-			selfSay('Here you are.', cid)
-			return true
-		elseif purchase == 'bp_lf' then
-			if not doPlayerRemoveMoney(cid, 1000) then
-				selfSay('You do not have enough money.', cid)
-				return true
-			end
-			if not giveFluidBackpack(cid, FLUID_LIFE) then
-				doPlayerAddMoney(cid, 1000)
-				selfSay('You do not have enough capacity.', cid)
-				return true
-			end
-			selfSay('Here you are.', cid)
+		if not purchase then
 			return true
 		end
+
+		local purchaseKind = type(purchase) == 'table' and purchase.type or purchase
+		local amount = type(purchase) == 'table' and purchase.amount or 1
+
+		return completeFluidPurchase(cid, purchaseKind, amount)
 	elseif message == 'no' and talkState[talkUser] == 2 then
 		selfSay('Ok then.', cid)
 		talkState[talkUser] = 0

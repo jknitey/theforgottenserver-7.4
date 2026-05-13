@@ -40,7 +40,7 @@
 	
 <!-- Instant Spells -->
 <!-- Attack Spells -->
-	<instant group="healing" spellid="80" name="Berserk" words="exori" maglv="5" manapercent="80" prem="0" exhaustion="2000" groupcooldown="2000" needlearn="0" script="attack/berserk.lua">
+	<instant group="healing" spellid="80" name="Berserk" words="exori" maglv="0" mana="2" prem="0" exhaustion="2000" groupcooldown="2000" needlearn="0" script="attack/berserk.lua">
 		<vocation name="Knight"/>
 		<vocation name="Elite Knight"/>
 	</instant>

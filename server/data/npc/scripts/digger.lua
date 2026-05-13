@@ -196,11 +196,11 @@ if msgcontains(msg, 'bp of explosion') or msgcontains(msg, 'bp of explo') then
 	end
 
 if msgcontains(msg, 'bp of mf') or msgcontains(msg, 'bp of manafluid') or msgcontains(msg, 'bp of mana fluid') then
-	npcHandler:say('Do you want to buy a backpack of mana fluid for 1100 gold coins?')
+	npcHandler:say('Do you want to buy a backpack of mana fluid for 100 gold coins?')
 	talk_state = 6
 	
 		elseif msgcontains(msg, 'yes') and talk_state == 6 then
-			if getPlayerMoney(cid) >= 1100 then
+			if getPlayerMoney(cid) >= 100 then
 				brown_bp = doPlayerAddItem(cid, 1988, 1)
 				doAddContainerItem(brown_bp, 2006, 7)
 				doAddContainerItem(brown_bp, 2006, 7)
@@ -222,7 +222,7 @@ if msgcontains(msg, 'bp of mf') or msgcontains(msg, 'bp of manafluid') or msgcon
 				doAddContainerItem(brown_bp, 2006, 7)
 				doAddContainerItem(brown_bp, 2006, 7)
 				doAddContainerItem(brown_bp, 2006, 7)
-				doPlayerRemoveMoney(cid, 1100)
+				doPlayerRemoveMoney(cid, 100)
 				npcHandler:say('Thank you for buying.')
 				talk_state = 0
 			else
@@ -249,7 +249,7 @@ shopModule:addBuyableItem({'spellbook'}, 2175, 150,	'spellbook')
 -- Fluids
 
 shopModule:addBuyableItem({'life fluid','lifefluid'}, 2006, 60,10,'life fluid')
-shopModule:addBuyableItem({'mana fluid','manafluid'},2006,55,7,'mana fluid')
+shopModule:addBuyableItem({'mana fluid','manafluid'},2006,5,7,'mana fluid')
 
 -- Runas 
 

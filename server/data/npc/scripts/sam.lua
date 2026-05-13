@@ -3,10 +3,147 @@ local keywordHandler = KeywordHandler:new()
 local npcHandler = NpcHandler:new(keywordHandler)
 NpcSystem.parseParameters(npcHandler)
 
+local buyItems = {
+	['battle hammer'] = {itemid = 2417, cost = 350},
+	['brass armor'] = {itemid = 2465, cost = 450},
+	['chain armor'] = {itemid = 2464, cost = 200},
+	['chain helmet'] = {itemid = 2458, cost = 52},
+	['chain legs'] = {itemid = 2648, cost = 80},
+	['hand axe'] = {itemid = 2380, cost = 8},
+	['leather armor'] = {itemid = 2467, cost = 35},
+	['leather helmet'] = {itemid = 2461, cost = 12},
+	['steel shield'] = {itemid = 2509, cost = 240},
+	['throwing knife'] = {itemid = 2410, cost = 25},
+	['throwing knives'] = {itemid = 2410, cost = 25},
+	['wooden shield'] = {itemid = 2512, cost = 15},
+	['axe'] = {itemid = 2386, cost = 20},
+	['dagger'] = {itemid = 2379, cost = 5},
+	['mace'] = {itemid = 2398, cost = 90},
+	['rapier'] = {itemid = 2384, cost = 15},
+	['sabre'] = {itemid = 2385, cost = 35},
+	['spear'] = {itemid = 2389, cost = 10},
+	['sword'] = {itemid = 2376, cost = 85}
+}
+
+local sellItems = {
+	['battle axe'] = {itemid = 2378, cost = 80},
+	['double axe'] = {itemid = 2387, cost = 260},
+	['battle hammer'] = {itemid = 2417, cost = 120},
+	['battle shield'] = {itemid = 2513, cost = 95},
+	['brass armor'] = {itemid = 2465, cost = 150},
+	['brass shield'] = {itemid = 2511, cost = 15},
+	['chain armor'] = {itemid = 2464, cost = 70},
+	['chain helmet'] = {itemid = 2458, cost = 17},
+	['chain legs'] = {itemid = 2648, cost = 25},
+	['hand axe'] = {itemid = 2380, cost = 4},
+	['leather armor'] = {itemid = 2467, cost = 12},
+	['leather helmet'] = {itemid = 2461, cost = 4},
+	['morning star'] = {itemid = 2394, cost = 90},
+	['plate armor'] = {itemid = 2463, cost = 400},
+	['short sword'] = {itemid = 2406, cost = 10},
+	['steel helmet'] = {itemid = 2457, cost = 190},
+	['steel shield'] = {itemid = 2509, cost = 80},
+	['two handed sword'] = {itemid = 2377, cost = 450},
+	['wooden shield'] = {itemid = 2512, cost = 5},
+	['axe'] = {itemid = 2386, cost = 7},
+	['dagger'] = {itemid = 2379, cost = 2},
+	['halberd'] = {itemid = 2381, cost = 400},
+	['mace'] = {itemid = 2398, cost = 30},
+	['rapier'] = {itemid = 2384, cost = 5},
+	['sabre'] = {itemid = 2385, cost = 12},
+	['spear'] = {itemid = 2389, cost = 3},
+	['sword'] = {itemid = 2376, cost = 25}
+}
+
+local function parseTradeRequest(message, verb)
+	local amount, itemName = message:match('^' .. verb .. '%s+(%d+)%s+(.+)$')
+	if amount and itemName then
+		return tonumber(amount) or 1, itemName
+	end
+
+	itemName = message:match('^' .. verb .. '%s+(.+)$')
+	if itemName then
+		return 1, itemName
+	end
+
+	return nil, nil
+end
+
+local function completeDirectBuy(cid, amount, item)
+	local totalCost = amount * item.cost
+	if doPlayerBuyItem(cid, item.itemid, amount, totalCost) then
+		npcHandler:say('Here you are.', cid)
+	else
+		npcHandler:say('You do not have enough money or capacity.', cid)
+	end
+	return true
+end
+
+local function completeDirectSell(cid, amount, item)
+	local totalCost = amount * item.cost
+	if doPlayerSellItem(cid, item.itemid, amount, totalCost) then
+		npcHandler:say('Here you are.', cid)
+	else
+		npcHandler:say('You do not have that item.', cid)
+	end
+	return true
+end
+
+local function shouldHandleDirectTrade(message)
+	if message == 'trade' or message == 'offer' then
+		return true
+	end
+
+	local _, buyItemName = parseTradeRequest(message, 'buy')
+	if buyItemName and buyItems[buyItemName] then
+		return true
+	end
+
+	local _, sellItemName = parseTradeRequest(message, 'sell')
+	if sellItemName and sellItems[sellItemName] then
+		return true
+	end
+
+	return false
+end
+
 function onCreatureAppear(cid)			npcHandler:onCreatureAppear(cid)			end
 function onCreatureDisappear(cid)		npcHandler:onCreatureDisappear(cid)			end
-function onCreatureSay(cid, type, msg)	npcHandler:onCreatureSay(cid, type, msg)	end
 function onThink()						npcHandler:onThink()						end
+
+function onCreatureSay(cid, type, msg)
+	local message = msg:lower()
+	if shouldHandleDirectTrade(message) then
+		if not npcHandler:isFocused(cid) and npcHandler:isInRange(cid) then
+			npcHandler:addFocus(cid)
+		end
+
+		if not npcHandler:isFocused(cid) then
+			return
+		end
+
+		if message == 'trade' or message == 'offer' then
+			npcHandler:say('Say buy itemname or sell itemname. For example: buy sword or sell battle axe.', cid)
+			return
+		end
+
+		local buyAmount, buyItemName = parseTradeRequest(message, 'buy')
+		local buyItem = buyItemName and buyItems[buyItemName]
+		if buyItem then
+			completeDirectBuy(cid, buyAmount, buyItem)
+			return
+		end
+
+		local sellAmount, sellItemName = parseTradeRequest(message, 'sell')
+		local sellItem = sellItemName and sellItems[sellItemName]
+		if sellItem then
+			completeDirectSell(cid, sellAmount, sellItem)
+			return
+		end
+	end
+
+	npcHandler:onCreatureSay(cid, type, msg)
+end
 
 function creatureSayCallback(cid, type, msg)
 	if(npcHandler.focus ~= cid) then

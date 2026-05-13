@@ -16,8 +16,8 @@ if(NpcHandler == nil) then
 	TALKDELAY_ONTHINK = 1 -- Talkdelay handled through the onThink callback function. (Default)
 	TALKDELAY_EVENT = 2 -- Not yet implemented
 
-	-- Currently applied talkdelay behavior. TALKDELAY_ONTHINK is default.
-	NPCHANDLER_TALKDELAY = TALKDELAY_ONTHINK
+	-- Currently applied talkdelay behavior.
+	NPCHANDLER_TALKDELAY = TALKDELAY_NONE
 
 	-- Constant conversation behaviors.
 	CONVERSATION_DEFAULT = 0 -- Conversation through default window, like it was before 8.2 update.

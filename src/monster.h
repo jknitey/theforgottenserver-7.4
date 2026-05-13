@@ -162,9 +162,7 @@ class Monster final : public Creature
 		}
 
 		bool isTarget(const Creature* creature) const;
-		bool isFleeing() const {
-			return getHealth() <= mType->runAwayHealth;
-		}
+		bool isFleeing() const;
 
 		bool getDistanceStep(const Position& targetPos, Direction& dir, bool flee = false);
 		bool isTargetNearby() const {

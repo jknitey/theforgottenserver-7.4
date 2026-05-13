@@ -80,10 +80,11 @@ rateSpawn = 2
 -- Monsters
 deSpawnRange = 2
 deSpawnRadius = 50
+monstersRunOnLowHealth = false
 -- If true, monsters may respawn even when players are near the spawn position.
 allowSpawnWithPlayersAround = true
 -- 1 = normal spawn time, 2 = 2x faster, 3 = 3x faster, etc.
-monsterSpawnTimeMultiplier = 5
+monsterSpawnTimeMultiplier = 3
 
 -- Scripts
 warnUnsafeScripts = true

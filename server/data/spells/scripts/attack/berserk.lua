@@ -6,15 +6,29 @@ combat:setParameter(COMBAT_PARAM_EFFECT, CONST_ME_HITAREA)
 local area = createCombatArea(AREA_SQUARE1X1)
 combat:setArea(area)
 
-function onGetFormulaValues(player, level, maglevel)
-	min = -(level * 2.2)
-	max = -(level * 3.85)
---	min = -((level * 2) + (maglevel * 3)) * 1.4
---	max = -((level * 2) + (maglevel * 3)) * 1.65
+local function getDamageFactor(attackFactor)
+	if attackFactor >= 1.9 then
+		return 0.5
+	elseif attackFactor >= 1.1 then
+		return 0.75
+	end
+
+	return 1.0
+end
+
+function onGetFormulaValues(player, skill, attack, attackFactor)
+	local damageFactor = getDamageFactor(attackFactor)
+	local level = player:getLevel()
+	skill = skill or 0
+	attack = attack or 0
+
+	local scaledDamage = 2.05 * (skill + (2 * attack)) * damageFactor
+	local min = -((level / 5) * damageFactor)
+	local max = -((scaledDamage + level) / 5)
 	return min, max
 end
 
-combat:setCallback(CALLBACK_PARAM_LEVELMAGICVALUE, "onGetFormulaValues")
+setCombatCallback(combat, CALLBACK_PARAM_SKILLVALUE, "onGetFormulaValues")
 
 function onCastSpell(creature, var)
 	-- check for stairHop delay

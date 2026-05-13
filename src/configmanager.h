@@ -46,6 +46,7 @@ class ConfigManager
 			ALLOW_FIGHT_BACK,
 			HOUSE_ANTI_TRASH,
 			ALLOW_SPAWN_WITH_PLAYERS_AROUND,
+			MONSTERS_RUN_ON_LOW_HEALTH,
 
 			LAST_BOOLEAN_CONFIG /* this must be the last one */
 		};

@@ -20,9 +20,11 @@
 #include "otpch.h"
 
 #include "monster.h"
+#include "configmanager.h"
 #include "game.h"
 #include "spells.h"
 
+extern ConfigManager g_config;
 extern Game g_game;
 extern Monsters g_monsters;
 
@@ -90,6 +92,15 @@ Monster::~Monster()
 {
 	clearTargetList();
 	clearFriendList();
+}
+
+bool Monster::isFleeing() const
+{
+	if (!g_config.getBoolean(ConfigManager::MONSTERS_RUN_ON_LOW_HEALTH)) {
+		return false;
+	}
+
+	return getHealth() <= mType->runAwayHealth;
 }
 
 void Monster::addList()

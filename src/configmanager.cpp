@@ -88,6 +88,7 @@ bool ConfigManager::load()
 	boolean[ALLOW_FIGHT_BACK] = getGlobalBoolean(L, "allowFightBack", true);
 	boolean[HOUSE_ANTI_TRASH] = getGlobalBoolean(L, "houseAntiTrash", false);
 	boolean[ALLOW_SPAWN_WITH_PLAYERS_AROUND] = getGlobalBoolean(L, "allowSpawnWithPlayersAround", false);
+	boolean[MONSTERS_RUN_ON_LOW_HEALTH] = getGlobalBoolean(L, "monstersRunOnLowHealth", true);
 
 
 	string[DEFAULT_PRIORITY] = getGlobalString(L, "defaultPriority", "high");
