@@ -47,6 +47,38 @@ extern Vocations g_vocations;
 extern GlobalEvents* g_globalEvents;
 extern Events* g_events;
 
+namespace {
+constexpr double KNIGHT_LIFESTEAL_PERCENT = 0.25;
+constexpr double EXORI_SANCT_HEALTH_RETURN_PERCENT = 0.25;
+constexpr double EXORI_SANCT_MANA_RETURN_PERCENT = 0.08;
+constexpr uint32_t EXORI_SANCT_PULSE_STORAGE = 95002;
+
+bool isKnightVocation(const Player* player)
+{
+	if (!player) {
+		return false;
+	}
+
+	switch (player->getVocationId()) {
+		case 4:
+		case 8:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool hasActiveExoriSanctPulse(Player* player)
+{
+	if (!player) {
+		return false;
+	}
+
+	int32_t value = -1;
+	return player->getStorageValue(EXORI_SANCT_PULSE_STORAGE, value) && value > 0;
+}
+}
+
 Game::Game() :
 	wildcardTree(false)
 {
@@ -3522,6 +3554,23 @@ bool Game::combatChangeHealth(Creature* attacker, Creature* target, CombatDamage
 		}
 
 		target->drainHealth(attacker, realDamage);
+		if (damage.origin == ORIGIN_MELEE && target->getMonster() && isKnightVocation(attackerPlayer)) {
+			int32_t healAmount = static_cast<int32_t>(std::floor(realDamage * KNIGHT_LIFESTEAL_PERCENT));
+			if (healAmount > 0) {
+				attackerPlayer->gainHealth(attackerPlayer, healAmount);
+			}
+		}
+		if (damage.origin == ORIGIN_SPELL && target->getMonster() && hasActiveExoriSanctPulse(attackerPlayer)) {
+			int32_t healthReturn = static_cast<int32_t>(std::floor(realDamage * EXORI_SANCT_HEALTH_RETURN_PERCENT));
+			if (healthReturn > 0) {
+				attackerPlayer->gainHealth(attackerPlayer, healthReturn);
+			}
+
+			int32_t manaReturn = static_cast<int32_t>(std::floor(realDamage * EXORI_SANCT_MANA_RETURN_PERCENT));
+			if (manaReturn > 0) {
+				attackerPlayer->changeMana(manaReturn);
+			}
+		}
 		if (list.empty()) {
 			map.getSpectators(list, targetPos, true, true);
 		}

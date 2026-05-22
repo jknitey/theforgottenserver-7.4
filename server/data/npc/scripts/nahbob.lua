@@ -42,9 +42,6 @@ shopModule:addBuyableItem({'beholder shield'}, 2518, 7000, 'war hammer')
 
 npcHandler:addModule(FocusModule:new())
 
-keywordHandler:addKeyword({'offer'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I sell and buy different kinds of armors. I also extract magic sulphur from fire swords, warrior\'s sweat from warrior helmets, fighting spirit from royal helmets and enchanted chicken wings from boots of haste.'})
-keywordHandler:addKeyword({'sell'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Why would I need that rubbish? Just fooling you... I buy dragon lances, fire axes, fire swords, war hammers, spike swords, ice rapiers, broad swords, obsidian lances, crown armors, blue robes, noble armors, royal helmets, crusader helmets, crown helmets, crown legs, boots of hastes, phoenix shields, crown shields, dragon shields, guardian shields and beholder shields.'})
 keywordHandler:addKeyword({'job'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I seel all kinds of tools.'})
 keywordHandler:addKeyword({'quest'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'A quest is nothing I want to be involved in.'})
 keywordHandler:addKeyword({'mission'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I can\'t help you in that area, son.'})
-keywordHandler:addKeyword({'buy'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Sorry but I do not sell those. Just fooling you... I sell war hammers, spike swords, noble armors and beholder shields.'})

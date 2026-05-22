@@ -7,5 +7,6 @@
 	<event type="advance" name="LevelRestore" script="levelrestore.lua" />
 	<event type="death" name="PlayerDeath" script="playerdeath.lua" />
 	<event type="death" name="DropLoot" script="droploot.lua" />
+	<event type="healthchange" name="ReactiveEnergyArmor" script="reactive_energy_armor.lua" />
 	<event type="extendedopcode" name="ExtendedOpcode" script="extendedopcode.lua" />
 </creaturescripts>

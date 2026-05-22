@@ -44,6 +44,10 @@
 		<vocation name="Knight"/>
 		<vocation name="Elite Knight"/>
 	</instant>
+	<instant group="healing" spellid="500" name="Exori Sanct" words="exori sanct" maglv="0" mana="5" prem="0" selftarget="1" exhaustion="8000" groupcooldown="8000" needlearn="0" script="attack/exori sanct.lua">
+		<vocation name="Knight"/>
+		<vocation name="Elite Knight"/>
+	</instant>
 	<instant group="healing" spellid="22" name="Energy Beam" words="exevo vis lux" maglv="10" mana="100" direction="1" exhaustion="2000" groupcooldown="2000" needlearn="0" script="attack/energy beam.lua">
 		<vocation name="Sorcerer"/>
 		<vocation name="Master Sorcerer"/>
@@ -53,6 +57,14 @@
 		<vocation name="Druid"/>
 		<vocation name="Master Sorcerer"/>
 		<vocation name="Elder Druid"/>
+	</instant>
+	<instant group="healing" spellid="501" name="Reactive Energy Armor" words="utori vis" maglv="3" mana="20" prem="0" aggressive="0" selftarget="1" exhaustion="1000" groupcooldown="1000" needlearn="0" script="support/reactive energy armor.lua">
+		<vocation name="Sorcerer"/>
+		<vocation name="Master Sorcerer"/>
+	</instant>
+	<instant group="healing" spellid="502" name="Divine Rush" words="utura pal" maglv="0" mana="10" prem="0" aggressive="0" selftarget="1" exhaustion="1000" groupcooldown="1000" needlearn="0" script="support/divine rush.lua">
+		<vocation name="Paladin"/>
+		<vocation name="Royal Paladin"/>
 	</instant>
 	<instant group="healing" spellid="13" name="Energy Wave" words="exevo mort hur" maglv="20" mana="250" direction="1" exhaustion="2000" groupcooldown="2000" needlearn="0" script="attack/energy wave.lua">
 		<vocation name="Sorcerer"/>
@@ -109,7 +121,7 @@
 		<vocation name="Elder Druid"/>
 		<vocation name="Royal Paladin"/>
 	</instant>
-	<instant group="healing" spellid="1" name="Light Healing" words="exura" maglv="1" mana="25" aggressive="0" selftarget="1" exhaustion="1000" groupcooldown="1000" needlearn="0" script="healing/light healing.lua">
+	<instant group="healing" spellid="1" name="Light Healing" words="exura" maglv="1" mana="10" aggressive="0" selftarget="1" exhaustion="1000" groupcooldown="1000" needlearn="0" script="healing/light healing.lua">
 		<vocation name="Sorcerer"/>
 		<vocation name="Druid"/>
 		<vocation name="Paladin"/>

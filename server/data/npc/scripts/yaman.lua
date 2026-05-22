@@ -44,9 +44,6 @@ shopModule:addBuyableItem({'dragon necklace'}, 2201, 1000, 'dragon necklace')
 
 npcHandler:addModule(FocusModule:new()) 
 
-keywordHandler:addKeyword({'offer'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I sell and buy different rings and amulets. I also extract magic sulphur from fire swords, warrior\'s sweat from warrior helmets, fighting spirit from royal helmets and enchanted chicken wings from boots of haste.'}) 
-keywordHandler:addKeyword({'sell'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Why would I need that rubbish? Just fooling you... I buy Might ring, Energy ring, Life ring, Time ring, Dwarven ring and Ring of healing. Strange Talisman, Silver amulet and Protection amulet, Dragon Necklace. Snakebite, Moonlight, Volcanic, Quagmire and Tempest rods. Also Ankh\'s and Mysterious Fetish.'}) 
 keywordHandler:addKeyword({'job'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I seel all kinds of tools.'}) 
 keywordHandler:addKeyword({'quest'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'A quest is nothing I want to be involved in.'}) 
 keywordHandler:addKeyword({'mission'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'I can\'t help you in that area, son.'}) 
-keywordHandler:addKeyword({'buy'}, StdModule.say, {npcHandler = npcHandler, onlyFocus = true, text = 'Sorry but I do not sell those. Just fooling you... I sell Might ring, Energy ring , Life ring, Time ring, Dwarven ring and Ring of healing. Strange Talisman, Silver amulet and Protection amulet, Dragon necklace.'})

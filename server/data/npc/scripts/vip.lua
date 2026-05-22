@@ -3,314 +3,180 @@ local keywordHandler = KeywordHandler:new()
 local npcHandler = NpcHandler:new(keywordHandler)
 NpcSystem.parseParameters(npcHandler)
 
-function onCreatureAppear(cid)			npcHandler:onCreatureAppear(cid)			end
-function onCreatureDisappear(cid)		npcHandler:onCreatureDisappear(cid)			end
-function onCreatureSay(cid, type, msg)	npcHandler:onCreatureSay(cid, type, msg)	end
-function onThink()						npcHandler:onThink()						end
+local pendingTravel = {}
+local freeTravelStorages = {30010, 30011, 30012, 30013}
+local ghostshipDestination = {x = 33330, y = 32172, z = 5, stackpos = 0}
+local vipIslandDestination = nil
 
-local function getTownTravelPosition(townName, fallback)
+local function getPlayerKey(cid)
+	if type(cid) == "userdata" and cid.getId ~= nil then
+		return cid:getId()
+	end
+
+	return cid
+end
+
+local function getTownTravelPosition(_, fallback)
 	return {x = fallback.x, y = fallback.y, z = fallback.z, stackpos = 0}
 end
 
+local routes = {
+	["vip"] = {
+		name = "vip island",
+		cost = 0,
+		destination = vipIslandDestination,
+		requiresStorage = 30009,
+		requiresPremium = false,
+		farewell = "You are not VIP."
+	},
+	["carlin"] = {
+		name = "Carlin",
+		cost = 130,
+		destination = getTownTravelPosition("Carlin", {x = 32388, y = 31821, z = 6}),
+		requiresPremium = false
+	},
+	["thais"] = {
+		name = "Thais",
+		cost = 0,
+		destination = getTownTravelPosition("Thais", {x = 32310, y = 32210, z = 7}),
+		requiresPremium = false
+	},
+	["ab'dendriel"] = {
+		name = "Ab'Dendriel",
+		cost = 90,
+		destination = getTownTravelPosition("Ab'Dendriel", {x = 32734, y = 31669, z = 7}),
+		requiresPremium = false
+	},
+	["darashia"] = {
+		name = "Darashia",
+		cost = 60,
+		destination = getTownTravelPosition("Darashia", {x = 33290, y = 32481, z = 7}),
+		requiresPremium = false,
+		ghostshipChance = 10,
+		ghostshipDestination = ghostshipDestination
+	},
+	["edron"] = {
+		name = "Edron",
+		cost = 40,
+		destination = getTownTravelPosition("Edron", {x = 33176, y = 31764, z = 7}),
+		requiresPremium = false
+	},
+	["ankrahmun"] = {
+		name = "Ankrahmun",
+		cost = 150,
+		destination = getTownTravelPosition("Ankrahmun", {x = 33092, y = 32884, z = 7}),
+		requiresPremium = false
+	},
+	["port hope"] = {
+		name = "Port Hope",
+		cost = 160,
+		destination = getTownTravelPosition("Port Hope", {x = 32530, y = 32784, z = 6}),
+		requiresPremium = false
+	}
+}
+
+local function clearPending(cid)
+	pendingTravel[getPlayerKey(cid)] = nil
+end
+
+local function hasFreeTravel(cid)
+	for _, storageId in ipairs(freeTravelStorages) do
+		if getPlayerStorageValue(cid, storageId) == 1 then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function getRouteCost(cid, route)
+	if route.requiresStorage then
+		return route.cost
+	end
+
+	if hasFreeTravel(cid) then
+		return 0
+	end
+
+	return route.cost
+end
+
+local function askTravel(cid, route)
+	if route.requiresStorage and getPlayerStorageValue(cid, route.requiresStorage) ~= 1 then
+		npcHandler:say(route.farewell or "You may not travel there yet.", cid)
+		clearPending(cid)
+		return
+	end
+
+	local cost = getRouteCost(cid, route)
+	local priceText = cost == 0 and "for free" or string.format("for %d gold", cost)
+	pendingTravel[getPlayerKey(cid)] = route
+	npcHandler:say(string.format("Do you seek a passage to %s %s?", route.name, priceText), cid)
+end
+
+local function handleTravel(cid, route)
+	local cost = getRouteCost(cid, route)
+	if route.requiresPremium and not isPremium(cid) then
+		npcHandler:say("I'm sorry, but you need a premium account in order to travel onboard our ships.", cid)
+	elseif hasCondition(cid, CONDITION_INFIGHT) == 1 then
+		npcHandler:say("First get rid of those blood stains! You are not going to ruin my vehicle!", cid)
+	elseif route.destination == nil then
+		npcHandler:say("This passage is currently unavailable.", cid)
+	elseif cost > 0 and getPlayerMoney(cid) < cost then
+		npcHandler:say("You don't have enough money.", cid)
+	else
+		local destination = route.destination
+		if route.ghostshipChance and math.random(1, route.ghostshipChance) == 1 then
+			destination = route.ghostshipDestination or destination
+		end
+
+		if cost > 0 then
+			doPlayerRemoveMoney(cid, cost)
+		end
+
+		npcHandler:say("Set the sails!", cid)
+		npcHandler:releaseFocus(cid)
+		doTeleportThing(cid, destination)
+		doSendMagicEffect(getCreaturePosition(cid), 10)
+	end
+
+	clearPending(cid)
+end
+
+function onCreatureAppear(cid) npcHandler:onCreatureAppear(cid) end
+function onCreatureDisappear(cid) npcHandler:onCreatureDisappear(cid) end
+function onCreatureSay(cid, type, msg) npcHandler:onCreatureSay(cid, type, msg) end
+function onThink() npcHandler:onThink() end
+
 function creatureSayCallback(cid, type, msg)
-	if(npcHandler.focus ~= cid) then
+	msg = string.lower(msg)
+	if not npcHandler:isFocused(cid) then
 		return false
 	end
-	
-	-- NPC Captain Fearless Venore Boat feito por Rodrigo (Nottinghster)
-	local venore = getTownTravelPosition('Venore', {x=32954, y=32022, z=7})
-	local thais = getTownTravelPosition('Thais', {x=32310, y=32210, z=7})
-	local carlin = getTownTravelPosition('Carlin', {x=32388, y=31821, z=6})
-	local abdendriel = getTownTravelPosition("Ab'Dendriel", {x=32734, y=31669, z=7})
-	local darashia = getTownTravelPosition('Darashia', {x=33290, y=32481, z=7})
-	local edron = getTownTravelPosition('Edron', {x=33176, y=31764, z=7})
-	local ankrahmun = getTownTravelPosition('Ankrahmun', {x=33092, y=32884, z=7})
-	local porthope = getTownTravelPosition('Port Hope', {x=32530, y=32784, z=6})
-	local ghostship = {x=33330,y=32172,z=5, stackpos=0}
-	
-	
-	-- Vip
-	if msgcontains(msg, 'vip') or msgcontains(msg, 'Vip') then
-	if getPlayerStorageValue(cid,30009) == 1 then
-	npcHandler:say('Do you seek a passage to vip island for free?')
-	talk_state = 1
-	else
-	npcHandler:say('You are not VIP.')
-	talk_state = 1
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 1 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 0 then
-				if getPlayerStorageValue(cid,30009) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, vip)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('You are ot VIP.')
-					
-				
-					
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Carlin
-	if msgcontains(msg, 'carlin') or msgcontains(msg, 'Carlin') then
-	if getPlayerStorageValue(cid,30009) == 1 or getPlayerStorageValue(cid,30009) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Carlin for free?')
-	talk_state = 2
-	else
-	npcHandler:say('Do you seek a passage to Carlin for 130 gold?')
-	talk_state = 2
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 2 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 130 then
-				if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, carlin)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 130)
-					doTeleportThing(cid, carlin)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Ab'Dendriel
-	if msgcontains(msg, 'ab\'dendriel') or msgcontains(msg, 'Ab\'dendriel') then
-	if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Ab\'Dendriel for free?')
-	talk_state = 3
-	else
-	npcHandler:say('Do you seek a passage to Ab\'dendriel for 90 gold?')
-	talk_state = 3
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 3 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 90 then
-				if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, abdendriel)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 90)
-					doTeleportThing(cid, abdendriel)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Darashia
-	if msgcontains(msg, 'darashia') or msgcontains(msg, 'Darashia') then
-	if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Darashia for free?')
-	talk_state = 4
-	else
-	npcHandler:say('Do you seek a passage to Darashia for 60 gold?')
-	talk_state = 4
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 4 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 60 then
-				if math.random(1,10) == 1 then
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 60)
-					doTeleportThing(cid, ghostship)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 60)
-					doTeleportThing(cid, darashia)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end
-			else
-				npcHandler:say('You don\'t have enough money.')
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Edron
-	if msgcontains(msg, 'edron') or msgcontains(msg, 'edron') then
-	if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Edron for free?')
-	talk_state = 5
-	else
-	npcHandler:say('Do you seek a passage to Edron for 40 gold?')
-	talk_state = 5
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 5 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 40 then
-				if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, edron)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 40)
-					doTeleportThing(cid, edron)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Ankrahmun
-	if msgcontains(msg, 'ankrahmun') or msgcontains(msg, 'Ankrahmun') then
-	if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Ankrahmun for free?')
-	talk_state = 6
-	else
-	npcHandler:say('Do you seek a passage to Ankrahmun for 150 gold?')
-	talk_state = 6
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 6 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 150 then
-				if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, ankrahmun)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 150)
-					doTeleportThing(cid, ankrahmun)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
-	
-	-- Port Hope
-	if msgcontains(msg, 'port hope') or msgcontains(msg, 'Port Hope') then
-	if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-	npcHandler:say('Do you seek a passage to Port Hope for free?')
-	talk_state = 7
-	else
-	npcHandler:say('Do you seek a passage to Port Hope for 160 gold?')
-	talk_state = 7
-	end
-	
-	elseif msgcontains(msg,'yes') and talk_state == 7 then
-	-- if isPremium(cid) == TRUE then
-		if hasCondition(cid, CONDITION_INFIGHT) ~= 1 then
-			if getPlayerMoney(cid) >= 160 then
-				if getPlayerStorageValue(cid,30010) == 1 or getPlayerStorageValue(cid,30011) == 1 or getPlayerStorageValue(cid,30012) == 1 or getPlayerStorageValue(cid,30013) == 1 then
-					selfSay('Set the sails!')
-					doTeleportThing(cid, porthope)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				else
-					selfSay('Set the sails!')
-					doPlayerRemoveMoney(cid, 160)
-					doTeleportThing(cid, porthope)
-					doSendMagicEffect(getCreaturePosition(cid), 10)
-					talk_state = 0
-				end	
-			else
-				npcHandler:say('You don\'t have enough money.')
-				talk_state = 0
-			end
-		else
-			npcHandler:say('First get rid of those blood stains! You are not going to ruin my vehicle!')
-			talk_state = 0
-		end
-	--[[ else
-		npcHandler:say('I\'m sorry, but you need a premium account in order to travel onboard our ships.')
-		talk_state = 0
-	end --]]
-end
 
-	return TRUE	
-end
+	for keyword, route in pairs(routes) do
+		if msgcontains(msg, keyword) then
+			askTravel(cid, route)
+			return true
+		end
+	end
 
+	if msgcontains(msg, "yes") then
+		local route = pendingTravel[getPlayerKey(cid)]
+		if route then
+			handleTravel(cid, route)
+			return true
+		end
+	elseif msgcontains(msg, "no") then
+		if pendingTravel[getPlayerKey(cid)] then
+			npcHandler:say("Ok, come back when you want then!", cid)
+			clearPending(cid)
+			return true
+		end
+	end
+
+	return false
+end
 
 npcHandler:setCallback(CALLBACK_MESSAGE_DEFAULT, creatureSayCallback)
 npcHandler:addModule(FocusModule:new())

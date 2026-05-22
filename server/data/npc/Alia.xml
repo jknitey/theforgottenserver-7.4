@@ -4,7 +4,7 @@
     <look type="138" head="96" body="95" legs="0" feet="95" addons="0"/>
     <parameters>
         
-		<parameter key="message_greetings" value="Welcome |PLAYERNAME|! Welcome to the temple of Carlin. If you need healing, I can help you."/>
+		<parameter key="message_greet" value="Welcome |PLAYERNAME|! Welcome to the temple of Carlin. If you need healing, I can help you."/>
         <parameter key="message_farewell" value="May the gods be with you, |PLAYERNAME|!"/>
         
         <parameter key="module_keywords" value="1" />

@@ -1161,18 +1161,20 @@ if(Modules == nil) then
 	--	cost = The price of one single item
 	--	subType - The subType of each rune or fluidcontainer item. Can be left out if it is not a rune/fluidcontainer. Default value is 1.
 	--	realName - The real, full name for the item. Will be used as ITEMNAME in MESSAGE_ONBUY and MESSAGE_ONSELL if defined. Default value is nil (getItemNameById will be used)
-	function ShopModule:addBuyableItemContainer(names, container, itemid, cost, subType, realName)
+	--	itemCount - Optional number of items to place in each container. Default value is 1.
+	function ShopModule:addBuyableItemContainer(names, container, itemid, cost, subType, realName, itemCount)
 		if(names ~= nil) then
 			local v = getItemInfo(itemid)
-			local parameters = {
-				container = container,
-				itemid = itemid,
-				cost = cost,
-				eventType = SHOPMODULE_BUY_ITEM_CONTAINER,
-				module = self,
-				realName = realName or v.name,
-				subType = tonumber(subType) or (v.charges > 0 and v.charges or 1)
-			}
+				local parameters = {
+					container = container,
+					itemid = itemid,
+					cost = cost,
+					eventType = SHOPMODULE_BUY_ITEM_CONTAINER,
+					itemCount = tonumber(itemCount) or 1,
+					module = self,
+					realName = realName or v.name,
+					subType = tonumber(subType) or (v.charges > 0 and v.charges or 1)
+				}
 
 			for i, name in pairs(names) do
 				local keywords = {}
@@ -1459,7 +1461,14 @@ if(Modules == nil) then
 				module.npcHandler:say(msg, cid)
 			end
 		elseif(parentParameters.eventType == SHOPMODULE_BUY_ITEM_CONTAINER) then
-			local ret = doPlayerBuyItemContainer(cid, parentParameters.container, parentParameters.itemid, module.amount, parentParameters.cost * module.amount, parentParameters.subType)
+			local ret = doPlayerBuyItemContainer(
+				cid,
+				parentParameters.container,
+				parentParameters.itemid,
+				module.amount * parentParameters.itemCount,
+				parentParameters.cost * module.amount,
+				parentParameters.subType
+			)
 			if(ret) then
 				local msg = module.npcHandler:getMessage(MESSAGE_ONBUY)
 				msg = module.npcHandler:parseMessage(msg, parseInfo)

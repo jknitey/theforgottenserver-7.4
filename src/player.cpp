@@ -750,8 +750,20 @@ bool Player::isNearDepotBox() const
 	return false;
 }
 
+namespace {
+constexpr uint32_t GLOBAL_DEPOT_ID = 2;
+
+uint32_t normalizeDepotId(uint32_t depotId)
+{
+	(void)depotId;
+	return GLOBAL_DEPOT_ID;
+}
+}
+
 DepotChest* Player::getDepotChest(uint32_t depotId, bool autoCreate)
 {
+	depotId = normalizeDepotId(depotId);
+
 	auto it = depotChests.find(depotId);
 	if (it != depotChests.end()) {
 		return it->second;
@@ -770,6 +782,8 @@ DepotChest* Player::getDepotChest(uint32_t depotId, bool autoCreate)
 
 DepotLocker* Player::getDepotLocker(uint32_t depotId)
 {
+	depotId = normalizeDepotId(depotId);
+
 	auto it = depotLockerMap.find(depotId);
 	if (it != depotLockerMap.end()) {
 		return it->second;

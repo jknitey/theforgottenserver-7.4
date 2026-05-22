@@ -239,7 +239,7 @@ if(NpcSystem == nil) then
 	PATTERN_COUNT = '%d+'
 
 	-- Talkdelay behavior. For more information, look at the top of npchandler.lua.
-	NPCHANDLER_TALKDELAY = TALKDELAY_NONE
+	NPCHANDLER_TALKDELAY = TALKDELAY_ONTHINK
 
 	-- Conversation behavior. For more information, look at the top of npchandler.lua.
 	NPCHANDLER_CONVBEHAVIOR = CONVERSATION_DEFAULT
@@ -275,6 +275,9 @@ if(NpcSystem == nil) then
 			npcHandler.talkRadius = tonumber(ret)
 		end
 		local ret = NpcSystem.getParameter('message_greet')
+		if(ret == nil) then
+			ret = NpcSystem.getParameter('message_greetings')
+		end
 		if(ret ~= nil) then
 			npcHandler:setMessage(MESSAGE_GREET, ret)
 		end

@@ -122,6 +122,7 @@ if(NpcHandler == nil) then
 		obj.keywordHandler = keywordHandler
 		obj.queue = Queue:new(obj)
 		obj.focuses = 0
+		obj.focus = 0
 		obj.talkStart = 0
 		obj.callbackFunctions = {}
 		obj.modules = {}
@@ -154,6 +155,7 @@ if(NpcHandler == nil) then
 		end
 
 		self.focuses = newFocus
+		self.focus = newFocus
 		self:updateFocus(true)
 	end
 	NpcHandler.changeFocus = NpcHandler.addFocus -- "changeFocus" looks better for CONVERSATION_DEFAULT

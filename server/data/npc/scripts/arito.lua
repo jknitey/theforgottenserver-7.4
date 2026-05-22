@@ -2,7 +2,6 @@ dofile("data/npc/lib/_npcsystem.lua")
 local keywordHandler = KeywordHandler:new()
 local npcHandler = NpcHandler:new(keywordHandler)
 NpcSystem.parseParameters(npcHandler)
-local talkState = {}
 
 function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid) 			end
 function onCreatureDisappear(cid) 			npcHandler:onCreatureDisappear(cid) 		end
@@ -20,6 +19,4 @@ shopModule:addBuyableItem({'ham'}, 2671, 15, 1)
 shopModule:addBuyableItem({'dragon ham'}, 2672, 25, 1)
 shopModule:addBuyableItem({'brown mushroom'}, 2789, 10, 1) 
 
-
-npcHandler:setCallback(CALLBACK_MESSAGE_DEFAULT, creatureSayCallback)
 npcHandler:addModule(FocusModule:new())

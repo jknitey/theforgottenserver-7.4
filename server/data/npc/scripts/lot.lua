@@ -1,8 +1,7 @@
 dofile("data/npc/lib/_npcsystem.lua")
-	local keywordHandler = KeywordHandler:new()
+local keywordHandler = KeywordHandler:new()
 local npcHandler = NpcHandler:new(keywordHandler)
 NpcSystem.parseParameters(npcHandler)
-local talkState = {}
 
 function onCreatureAppear(cid)				npcHandler:onCreatureAppear(cid) 			end
 function onCreatureDisappear(cid) 			npcHandler:onCreatureDisappear(cid) 		end
@@ -137,6 +136,4 @@ shopModule:addSellableItem({'thunder hammer'}, 2421, 200000, 'thunder hammer')
 shopModule:addSellableItem({'stonecutter axe'}, 2431, 150000, 'stonecutter axe')
 shopModule:addSellableItem({'arcane staff'}, 2453, 150000, 'arcane staff')
 
-npcHandler:setCallback(CALLBACK_MESSAGE_DEFAULT, creatureSayCallback)
 npcHandler:addModule(FocusModule:new())
-
